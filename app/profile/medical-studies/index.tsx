@@ -20,9 +20,7 @@ export default function MedicalStudiesScreen() {
             <Text className="font-sans text-text-secondary mb-4">
               Todavía no subiste estudios.
             </Text>
-            <Button onPress={() => router.push('/profile/medical-studies/upload')}>
-              + Subir estudio
-            </Button>
+            <Button disabled>+ Subir estudio (próximamente)</Button>
           </>
         ) : (
           <Text className="font-sans text-text-secondary">

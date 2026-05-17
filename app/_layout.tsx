@@ -29,7 +29,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     if (isLoading) return;
 
     const inAuth = segments[0] === '(auth)';
-    const inOnboarding = segments.includes('onboarding');
+    const inOnboarding = segments.some((s) => String(s).includes('onboarding'));
 
     if (!isSupabaseConfigured) {
       const done = profile?.onboarding_done;
