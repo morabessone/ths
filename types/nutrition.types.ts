@@ -4,6 +4,16 @@ export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'ver
 export type TrainingType = 'strength' | 'cardio' | 'mixed' | 'functional' | 'none';
 export type DayType = 'training' | 'rest' | 'light_activity';
 export type MealType = 'breakfast' | 'lunch' | 'snack' | 'dinner';
+export type DietaryStyle = 'omnivore' | 'vegetarian' | 'vegan' | 'keto' | 'gluten_free';
+export type TrainingTimeSlot = 'morning' | 'afternoon' | 'evening';
+export type CravingType = 'hungry' | 'sweet' | 'salty' | 'quick';
+export type PlanMomentId =
+  | 'breakfast'
+  | 'pre_training'
+  | 'lunch'
+  | 'post_training'
+  | 'snack'
+  | 'dinner';
 
 export interface MealIngredient {
   name: string;
@@ -27,6 +37,8 @@ export interface Meal {
   macros: MealMacros;
   micros?: Record<string, number>;
   preparation: string[];
+  moment_id?: PlanMomentId;
+  carb_type?: string;
 }
 
 export interface SupplementRecommendation {
@@ -50,6 +62,53 @@ export interface WearableContext {
   steps?: number;
   calories_burned?: number;
   training_detected?: boolean;
+  training_type?: string;
+  training_duration_min?: number;
+  source?: string;
+  plan_summary?: string;
+  micro_alerts?: MicroGuidance[];
+}
+
+export interface MicroGuidance {
+  nutrient: string;
+  severity: 'low' | 'moderate' | 'high';
+  message: string;
+  food_suggestions: string[];
+  supplement_note?: string;
+}
+
+export interface PlanMoment {
+  id: PlanMomentId;
+  label: string;
+  time_hint: string;
+  meal: Meal | null;
+  timing_rationale?: string;
+}
+
+export interface DailyPlanBuilt {
+  targets: NutrientTargets;
+  studyAlerts: StudyAlert[];
+  microGuidance: MicroGuidance[];
+  moments: PlanMoment[];
+  breakfast: Meal;
+  lunch: Meal;
+  snack: Meal | null;
+  dinner: Meal;
+  supplements: SupplementRecommendation[];
+  education_tip: EducationTip;
+  daySummary: string;
+  wearable_context: WearableContext;
+}
+
+export interface NowSuggestion {
+  id: string;
+  title: string;
+  description: string;
+  type: 'fridge_meal' | 'pantry_tip' | 'quick_option';
+  meal?: Meal;
+  tip?: string;
+  brands?: string[];
+  aligns_with_plan: string;
 }
 
 export interface NutrientTargets {
@@ -115,4 +174,11 @@ export interface BiometricsInput {
   intolerances?: string[];
   health_conditions?: string[];
   lean_mass_kg?: number;
+}
+
+export interface DailyPlanBuilderInput {
+  bio: BiometricsInput;
+  wearable?: import('@/types/health.types').NormalizedHealthData | null;
+  studies?: MedicalStudy[];
+  fridgeIngredients?: string[];
 }

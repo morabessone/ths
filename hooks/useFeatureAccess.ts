@@ -4,7 +4,7 @@ import { useUserStore } from '@/stores/useUserStore';
 const FEATURE_GATES = {
   full_micros: 'premium',
   medical_studies: 'premium',
-  wearable_sync: 'premium',
+  wearable_sync: 'free',
   fridge_unlimited: 'premium',
   anthropometry: 'premium',
   education_full: 'premium',

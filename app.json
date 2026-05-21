@@ -15,14 +15,24 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.livin.mobile"
+      "bundleIdentifier": "app.livin.mobile",
+      "infoPlist": {
+        "NSHealthShareUsageDescription": "LivIn lee pasos, sueño y entrenamientos de Apple Salud para ajustar tu plan nutricional.",
+        "NSHealthUpdateUsageDescription": "LivIn puede registrar datos de salud que autorices."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FAFAF9"
       },
-      "package": "app.livin.mobile"
+      "package": "app.livin.mobile",
+      "permissions": [
+        "android.permission.health.READ_STEPS",
+        "android.permission.health.READ_SLEEP",
+        "android.permission.health.READ_ACTIVE_CALORIES_BURNED",
+        "android.permission.health.READ_EXERCISE"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -31,6 +41,14 @@
     },
     "plugins": [
       "expo-router",
+      "expo-health-connect",
+      [
+        "@kingstinct/react-native-healthkit",
+        {
+          "NSHealthShareUsageDescription": "LivIn lee pasos, sueño y entrenamientos para personalizar tu plan.",
+          "NSHealthUpdateUsageDescription": "LivIn puede guardar datos de salud que autorices."
+        }
+      ],
       "expo-secure-store",
       [
         "expo-camera",

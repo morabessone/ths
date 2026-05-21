@@ -1,0 +1,146 @@
+import type { DietaryStyle, Meal, PlanMomentId } from '@/types/nutrition.types';
+
+export interface MealTemplate extends Meal {
+  tags: string[];
+  diets: DietaryStyle[];
+  moment: PlanMomentId;
+}
+
+export const MEAL_TEMPLATES: MealTemplate[] = [
+  {
+    tags: ['pre_workout', 'carbs'],
+    diets: ['omnivore', 'vegetarian', 'gluten_free'],
+    moment: 'pre_training',
+    name: 'Avena con banana y claras',
+    timing_note: '60–90 min antes de entrenar',
+    carb_type: 'Simples + complejos',
+    why: 'Energía disponible sin pesadez: hidratos para glucógeno y proteína moderada.',
+    ingredients: [
+      { name: 'Avena', quantity: 70, unit: 'g', available: true },
+      { name: 'Banana', quantity: 1, unit: 'unidad', available: true },
+      { name: 'Claras de huevo', quantity: 120, unit: 'g', available: true },
+    ],
+    macros: { calories: 420, protein_g: 28, carbs_g: 62, fat_g: 7 },
+    preparation: ['Cociná la avena 5 min.', 'Sumá banana y claras revueltas.'],
+  },
+  {
+    tags: ['breakfast', 'rest_day'],
+    diets: ['omnivore', 'vegetarian'],
+    moment: 'breakfast',
+    name: 'Huevos con pan integral y palta',
+    carb_type: 'Complejos + grasas buenas',
+    why: 'Proteína y grasas de calidad para saciedad hasta el mediodía.',
+    ingredients: [
+      { name: 'Huevos', quantity: 2, unit: 'unidad', available: true },
+      { name: 'Pan integral', quantity: 2, unit: 'rebanadas', available: true },
+      { name: 'Palta', quantity: 0.5, unit: 'unidad', available: true },
+    ],
+    macros: { calories: 480, protein_g: 26, carbs_g: 38, fat_g: 28 },
+    preparation: ['Huevos revueltos o pochados.', 'Tostá el pan y sumá palta.'],
+  },
+  {
+    tags: ['post_workout', 'carbs'],
+    diets: ['omnivore', 'vegetarian', 'gluten_free'],
+    moment: 'post_training',
+    name: 'Batido proteico con fruta',
+    timing_note: 'Dentro de 90 min post-entreno',
+    carb_type: 'Hidratos simples',
+    why: 'Ventana de glucógeno: proteína rápida + fruta para reponer.',
+    ingredients: [
+      { name: 'Proteína en polvo', quantity: 30, unit: 'g', available: true },
+      { name: 'Banana', quantity: 1, unit: 'unidad', available: true },
+      { name: 'Leche descremada', quantity: 250, unit: 'ml', available: true },
+    ],
+    macros: { calories: 360, protein_g: 36, carbs_g: 42, fat_g: 4 },
+    preparation: ['Licuar todo 30 segundos.'],
+  },
+  {
+    tags: ['lunch', 'balanced'],
+    diets: ['omnivore', 'gluten_free'],
+    moment: 'lunch',
+    name: 'Pollo con arroz y verduras',
+    carb_type: 'Complejos',
+    why: 'Plato equilibrado: proteína magra, arroz y fibra de verduras.',
+    ingredients: [
+      { name: 'Pechuga de pollo', quantity: 160, unit: 'g', available: true },
+      { name: 'Arroz integral', quantity: 140, unit: 'g', available: true },
+      { name: 'Brócoli', quantity: 150, unit: 'g', available: true },
+    ],
+    macros: { calories: 580, protein_g: 48, carbs_g: 58, fat_g: 12 },
+    preparation: ['Arroz.', 'Pollo a la plancha.', 'Verduras al vapor.'],
+  },
+  {
+    tags: ['lunch', 'vit_d', 'fish'],
+    diets: ['omnivore', 'gluten_free'],
+    moment: 'lunch',
+    name: 'Salmón con quinoa y ensalada',
+    carb_type: 'Complejos + omega-3',
+    why: 'Priorizamos pescado graso para cubrir vitamina D y omega-3 según tus estudios.',
+    ingredients: [
+      { name: 'Salmón', quantity: 150, unit: 'g', available: true },
+      { name: 'Quinoa', quantity: 80, unit: 'g', available: true },
+      { name: 'Espinaca', quantity: 80, unit: 'g', available: true },
+    ],
+    macros: { calories: 560, protein_g: 44, carbs_g: 42, fat_g: 24 },
+    preparation: ['Quinoa 15 min.', 'Salmón al horno 15 min a 180°C.', 'Ensalada cruda.'],
+  },
+  {
+    tags: ['lunch', 'vegetarian'],
+    diets: ['vegetarian', 'vegan'],
+    moment: 'lunch',
+    name: 'Bowl de legumbres y arroz',
+    carb_type: 'Complejos + fibra',
+    why: 'Proteína vegetal completa con hierro y folato del leguminosas.',
+    ingredients: [
+      { name: 'Lentejas', quantity: 150, unit: 'g', available: true },
+      { name: 'Arroz', quantity: 120, unit: 'g', available: true },
+      { name: 'Tomate', quantity: 1, unit: 'unidad', available: true },
+    ],
+    macros: { calories: 520, protein_g: 28, carbs_g: 72, fat_g: 8 },
+    preparation: ['Cociná legumbres y arroz.', 'Mezclá con tomate fresco.'],
+  },
+  {
+    tags: ['snack', 'afternoon'],
+    diets: ['omnivore', 'vegetarian', 'keto'],
+    moment: 'snack',
+    name: 'Yogur griego con frutos secos',
+    carb_type: 'Moderados',
+    why: 'Proteína y grasas para saciedad sin pico glucémico fuerte.',
+    ingredients: [
+      { name: 'Yogur griego', quantity: 170, unit: 'g', available: true },
+      { name: 'Almendras', quantity: 20, unit: 'g', available: true },
+    ],
+    macros: { calories: 280, protein_g: 22, carbs_g: 14, fat_g: 16 },
+    preparation: ['Mezclá en un bowl.'],
+  },
+  {
+    tags: ['dinner', 'recovery'],
+    diets: ['omnivore', 'gluten_free'],
+    moment: 'dinner',
+    name: 'Pescado blanco con puré de calabaza',
+    carb_type: 'Complejos livianos',
+    why: 'Cena digestiva: proteína magra, magnesio de la calabaza para el sueño.',
+    ingredients: [
+      { name: 'Merluza', quantity: 180, unit: 'g', available: true },
+      { name: 'Calabaza', quantity: 200, unit: 'g', available: true },
+      { name: 'Aceite de oliva', quantity: 1, unit: 'cda', available: true },
+    ],
+    macros: { calories: 420, protein_g: 40, carbs_g: 28, fat_g: 14 },
+    preparation: ['Puré de calabaza.', 'Pescado al horno o plancha.'],
+  },
+  {
+    tags: ['dinner', 'iron'],
+    diets: ['omnivore'],
+    moment: 'dinner',
+    name: 'Carne magra con ensalada de hojas verdes',
+    carb_type: 'Bajos',
+    why: 'Hierro hemo para mejorar ferritina según tu perfil.',
+    ingredients: [
+      { name: 'Bife de chorizo magro', quantity: 150, unit: 'g', available: true },
+      { name: 'Rúcula', quantity: 60, unit: 'g', available: true },
+      { name: 'Limón', quantity: 0.5, unit: 'unidad', available: true },
+    ],
+    macros: { calories: 450, protein_g: 42, carbs_g: 8, fat_g: 26 },
+    preparation: ['Plancha la carne.', 'Ensalada con limón y aceite.'],
+  },
+];
