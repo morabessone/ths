@@ -10,6 +10,7 @@ import { Fraunces_600SemiBold, Fraunces_700Bold } from '@expo-google-fonts/fraun
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import { AppProviders } from '@/providers/AppProviders';
@@ -28,35 +29,52 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isLoading) return;
 
-    const inAuth = segments[0] === '(auth)';
+    const root = segments[0];
+    const inAuth = root === '(auth)';
     const inOnboarding = segments.some((s) => String(s).includes('onboarding'));
 
+    // Modo demo sin Supabase
     if (!isSupabaseConfigured) {
-      const done = profile?.onboarding_done;
-      if (done && inAuth) {
+      if (profile?.onboarding_done && inAuth) {
         router.replace('/(tabs)');
-        return;
-      }
-      if (!done && !inAuth && segments[0] !== '(tabs)' && segments[0] !== 'profile') {
+      } else if (!profile?.onboarding_done && root === '(tabs)') {
         router.replace('/(auth)/welcome');
       }
       return;
     }
 
-    if (!user && !inAuth) {
-      router.replace('/(auth)/welcome');
+    // Sin sesión: solo pantallas de auth públicas
+    if (!user) {
+      if (!inAuth) {
+        router.replace('/(auth)/welcome');
+      }
       return;
     }
 
-    if (user && profile && !profile.onboarding_done && !inOnboarding) {
-      router.replace('/(auth)/onboarding/step-1-biometrics');
+    // Con sesión pero perfil aún cargando: no redirigir
+    if (!profile) return;
+
+    // Onboarding pendiente
+    if (!profile.onboarding_done) {
+      if (!inOnboarding) {
+        router.replace('/(auth)/onboarding/step-1-biometrics');
+      }
       return;
     }
 
-    if (user && profile?.onboarding_done && inAuth) {
+    // Onboarding listo → app principal (no volver a welcome/login)
+    if (inAuth && !inOnboarding) {
       router.replace('/(tabs)');
     }
   }, [user, profile, isLoading, segments, router]);
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 bg-bg items-center justify-center">
+        <ActivityIndicator size="large" color="#5B4FCF" />
+      </View>
+    );
+  }
 
   return <>{children}</>;
 }
@@ -91,6 +109,7 @@ export default function RootLayout() {
           <Stack.Screen name="profile" options={{ headerShown: false }} />
           <Stack.Screen name="settings" options={{ headerShown: false }} />
           <Stack.Screen name="supplements" options={{ headerShown: false }} />
+          <Stack.Screen name="learn" options={{ headerShown: false }} />
         </Stack>
       </AuthGate>
     </AppProviders>

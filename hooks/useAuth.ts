@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { ensureUserProfile, fetchUserProfile } from '@/lib/auth/profile';
 import { useUserStore } from '@/stores/useUserStore';
-import type { Profile } from '@/types/database.types';
 
 export function useAuth() {
   const [isLoading, setIsLoading] = useState(true);
@@ -13,28 +13,49 @@ export function useAuth() {
       return;
     }
 
-    const loadProfile = async (userId: string) => {
-      const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
-      if (data) setProfile(data as Profile);
+    let mounted = true;
+
+    const syncSession = async (userId: string, email: string, fullName?: string | null) => {
+      const p = await ensureUserProfile(userId, email, fullName);
+      if (mounted && p) setProfile(p);
     };
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) loadProfile(session.user.id);
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!mounted) return;
+      const u = session?.user ?? null;
+      setUser(u);
+      if (u) {
+        await syncSession(u.id, u.email ?? '', u.user_metadata?.full_name as string | undefined);
+      }
       setIsLoading(false);
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        loadProfile(session.user.id);
-      } else {
+    const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const u = session?.user ?? null;
+      setUser(u);
+      if (u) {
+        await syncSession(u.id, u.email ?? '', u.user_metadata?.full_name as string | undefined);
+      } else if (event === 'SIGNED_OUT') {
         logout();
       }
+      if (mounted) setIsLoading(false);
     });
 
-    return () => listener.subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      listener.subscription.unsubscribe();
+    };
   }, [setUser, setProfile, logout]);
 
-  return { user, profile, isLoading, isAuthenticated: Boolean(user) };
+  return {
+    user,
+    profile,
+    isLoading,
+    isAuthenticated: Boolean(user),
+    refreshProfile: async () => {
+      if (!user) return;
+      const p = await fetchUserProfile(user.id);
+      if (p) setProfile(p);
+    },
+  };
 }

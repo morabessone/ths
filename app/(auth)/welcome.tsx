@@ -16,7 +16,7 @@ export default function WelcomeScreen() {
         </Text>
       </Animated.View>
       <Animated.View entering={FadeInDown.delay(500).duration(600)} className="gap-3">
-        <Link href="/(auth)/onboarding/step-1-biometrics" asChild>
+        <Link href="/(auth)/register" asChild>
           <Button>Empezar</Button>
         </Link>
         <Link href="/(auth)/login" asChild>

@@ -9,9 +9,13 @@ import { Button } from '@/components/ui/Button';
 import { registerSchema, type RegisterForm } from '@/lib/auth/schemas';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { getSpanishErrorMessage } from '@/lib/errors';
+import { ensureUserProfile } from '@/lib/auth/profile';
+import { useUserStore } from '@/stores/useUserStore';
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const setUser = useUserStore((s) => s.setUser);
+  const setProfile = useUserStore((s) => s.setProfile);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -27,16 +31,33 @@ export default function RegisterScreen() {
       return;
     }
     setLoading(true);
-    const { error: authError } = await supabase.auth.signUp({
+    const { data: signUpData, error: authError } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
       options: { data: { full_name: data.fullName } },
     });
     setLoading(false);
+
     if (authError) {
       setError(getSpanishErrorMessage(authError));
       return;
     }
+
+    if (!signUpData.session || !signUpData.user) {
+      setError(
+        'Te enviamos un email de confirmación. Abrilo, confirmá la cuenta y después iniciá sesión.'
+      );
+      return;
+    }
+
+    setUser(signUpData.user);
+    const profile = await ensureUserProfile(
+      signUpData.user.id,
+      signUpData.user.email ?? data.email,
+      data.fullName
+    );
+    if (profile) setProfile(profile);
+
     router.replace('/(auth)/onboarding/step-1-biometrics');
   };
 

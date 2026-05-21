@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { useUserStore } from '@/stores/useUserStore';
 import { useDayPlanStore } from '@/stores/useDayPlanStore';
 import type { Meal, EducationTip as TipType, SupplementRecommendation } from '@/types/nutrition.types';
+import { useVideoYoutubeId } from '@/hooks/useEducationVideos';
 import { getTimingNote } from '@/constants/timing-rules';
 
 function parseMeal(json: unknown): Meal | null {
@@ -49,6 +50,9 @@ export default function HomeScreen() {
     : todayPlan
       ? 'Día de recuperación'
       : format(new Date(), "EEEE d 'de' MMMM", { locale: es });
+
+  const educationTip = parseTip(todayPlan?.education_tip);
+  const { data: tipVideoYoutubeId } = useVideoYoutubeId(educationTip?.video_id);
 
   const sleepInsight =
     wearableData?.sleep_hours != null && Number(wearableData.sleep_hours) < 6.5
@@ -123,7 +127,8 @@ export default function HomeScreen() {
         ) : null}
 
         <EducationTip
-          tip={parseTip(todayPlan?.education_tip)}
+          tip={educationTip}
+          videoYoutubeId={tipVideoYoutubeId}
           onExplore={() => router.push('/(tabs)/learn')}
         />
       </ScrollView>

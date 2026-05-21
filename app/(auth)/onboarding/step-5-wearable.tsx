@@ -10,6 +10,7 @@ import { useOnboardingStore } from '@/stores/useOnboardingStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { useDayPlanStore } from '@/stores/useDayPlanStore';
+import { fetchUserProfile } from '@/lib/auth/profile';
 
 export default function Step5Wearable() {
   const router = useRouter();
@@ -20,8 +21,10 @@ export default function Step5Wearable() {
   const [source, setSource] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const finishOnboarding = async () => {
+    setError(null);
     setLoading(true);
     const bio = {
       weight_kg: store.weight_kg,
@@ -40,33 +43,40 @@ export default function Step5Wearable() {
 
     updateBiometrics(bio as Parameters<typeof updateBiometrics>[0]);
 
-    const userId = user?.id ?? 'demo-user';
-
-    if (isSupabaseConfigured && user) {
-      await supabase.from('biometrics').insert({ user_id: user.id, ...bio } as never);
-      await supabase
-        .from('profiles')
-        .update({ onboarding_done: true } as never)
-        .eq('id', user.id);
-      const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      if (profile) setProfile(profile);
-    } else {
-      setProfile({
-        id: userId,
-        email: 'demo@livin.app',
-        full_name: 'Usuario',
-        avatar_url: null,
-        role: 'free',
-        onboarding_done: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      });
+    if (!isSupabaseConfigured || !user) {
+      setError('Iniciá sesión o creá una cuenta para guardar tu perfil.');
+      setLoading(false);
+      return;
     }
 
-    await useDayPlanStore.getState().regeneratePlan(userId);
+    const { error: bioError } = await supabase
+      .from('biometrics')
+      .insert({ user_id: user.id, ...bio } as never);
+
+    if (bioError) {
+      setError('No pudimos guardar tus datos. Intentá de nuevo.');
+      setLoading(false);
+      return;
+    }
+
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ onboarding_done: true } as never)
+      .eq('id', user.id);
+
+    if (profileError) {
+      setError('No pudimos completar el onboarding. Intentá de nuevo.');
+      setLoading(false);
+      return;
+    }
+
+    const profile = await fetchUserProfile(user.id);
+    if (profile) setProfile(profile);
+
+    await useDayPlanStore.getState().regeneratePlan(user.id);
     setLoading(false);
     setDone(true);
-    setTimeout(() => router.replace('/(tabs)'), 1500);
+    setTimeout(() => router.replace('/(tabs)'), 1200);
   };
 
   if (done) {
@@ -90,6 +100,11 @@ export default function Step5Wearable() {
         <Text className="font-sans text-text-secondary mb-6">
           LivIn lee tu actividad para ajustar el plan automáticamente. Podés omitirlo y conectarlo después.
         </Text>
+        {!user ? (
+          <Text className="font-sans text-warning text-sm mb-4">
+            Necesitás una cuenta activa. Registrate o iniciá sesión antes de finalizar.
+          </Text>
+        ) : null}
         <OptionSelector
           options={[
             { value: 'apple_health', label: 'Apple Watch / Health' },
@@ -103,7 +118,8 @@ export default function Step5Wearable() {
             store.setField('wearable_source', v as string);
           }}
         />
-        <View className="mt-6 gap-3">
+        {error ? <Text className="text-danger font-sans text-sm mt-2">{error}</Text> : null}
+        <View className="mt-6 gap-3 mb-8">
           <Button loading={loading} onPress={finishOnboarding}>
             Finalizar
           </Button>

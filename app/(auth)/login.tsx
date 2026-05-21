@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
+import { Text, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,9 +9,13 @@ import { Button } from '@/components/ui/Button';
 import { loginSchema, type LoginForm } from '@/lib/auth/schemas';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { getSpanishErrorMessage } from '@/lib/errors';
+import { ensureUserProfile } from '@/lib/auth/profile';
+import { useUserStore } from '@/stores/useUserStore';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const setUser = useUserStore((s) => s.setUser);
+  const setProfile = useUserStore((s) => s.setProfile);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -27,16 +31,29 @@ export default function LoginScreen() {
       return;
     }
     setLoading(true);
-    const { error: authError } = await supabase.auth.signInWithPassword({
+    const { data: signInData, error: authError } = await supabase.auth.signInWithPassword({
       email: data.email,
       password: data.password,
     });
     setLoading(false);
+
     if (authError) {
       setError(getSpanishErrorMessage(authError));
       return;
     }
-    router.replace('/(tabs)');
+
+    setUser(signInData.user);
+    const profile = await ensureUserProfile(
+      signInData.user.id,
+      signInData.user.email ?? data.email
+    );
+    if (profile) setProfile(profile);
+
+    if (profile?.onboarding_done) {
+      router.replace('/(tabs)');
+    } else {
+      router.replace('/(auth)/onboarding/step-1-biometrics');
+    }
   };
 
   return (

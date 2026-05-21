@@ -26,6 +26,7 @@ export interface Database {
           onboarding_done?: boolean;
           updated_at?: string;
         };
+        Relationships: [];
       };
       biometrics: {
         Row: {
@@ -65,6 +66,7 @@ export interface Database {
           recorded_at?: string;
         };
         Update: Partial<Database['public']['Tables']['biometrics']['Insert']>;
+        Relationships: [];
       };
       daily_plan: {
         Row: {
@@ -85,6 +87,7 @@ export interface Database {
           date: string;
         };
         Update: Partial<Database['public']['Tables']['daily_plan']['Insert']>;
+        Relationships: [];
       };
       nutrient_targets: {
         Row: {
@@ -117,6 +120,7 @@ export interface Database {
           date: string;
         };
         Update: Partial<Database['public']['Tables']['nutrient_targets']['Insert']>;
+        Relationships: [];
       };
       fridge_stock: {
         Row: {
@@ -131,6 +135,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['fridge_stock']['Row'], 'id'> & { id?: string };
         Update: Partial<Database['public']['Tables']['fridge_stock']['Insert']>;
+        Relationships: [];
       };
       wearable_data: {
         Row: {
@@ -152,6 +157,7 @@ export interface Database {
           date: string;
         };
         Update: Partial<Database['public']['Tables']['wearable_data']['Insert']>;
+        Relationships: [];
       };
       subscriptions: {
         Row: {
@@ -171,11 +177,123 @@ export interface Database {
           status: string;
         };
         Update: Partial<Database['public']['Tables']['subscriptions']['Insert']>;
+        Relationships: [];
+      };
+      education_categories: {
+        Row: {
+          id: string;
+          slug: string;
+          name: string;
+          description: string | null;
+          emoji: string | null;
+          cover_color: string;
+          order_index: number;
+          published: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          name: string;
+          description?: string | null;
+          emoji?: string | null;
+          cover_color?: string;
+          order_index?: number;
+          published?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          slug?: string;
+          name?: string;
+          description?: string | null;
+          emoji?: string | null;
+          cover_color?: string;
+          order_index?: number;
+          published?: boolean;
+        };
+        Relationships: [];
+      };
+      education_videos: {
+        Row: {
+          id: string;
+          category_id: string;
+          youtube_id: string;
+          title: string;
+          description: string | null;
+          instructor: string | null;
+          instructor_bio: string | null;
+          duration_min: number | null;
+          level: 'beginner' | 'intermediate' | 'advanced';
+          tags: string[];
+          is_premium: boolean;
+          featured: boolean;
+          order_index: number;
+          published: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          category_id: string;
+          youtube_id: string;
+          title: string;
+          description?: string | null;
+          instructor?: string | null;
+          instructor_bio?: string | null;
+          duration_min?: number | null;
+          level?: 'beginner' | 'intermediate' | 'advanced';
+          tags?: string[];
+          is_premium?: boolean;
+          featured?: boolean;
+          order_index?: number;
+          published?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          category_id?: string;
+          youtube_id?: string;
+          title?: string;
+          description?: string | null;
+          instructor?: string | null;
+          instructor_bio?: string | null;
+          duration_min?: number | null;
+          level?: 'beginner' | 'intermediate' | 'advanced';
+          tags?: string[];
+          is_premium?: boolean;
+          featured?: boolean;
+          order_index?: number;
+          published?: boolean;
+        };
+        Relationships: [];
+      };
+      video_progress: {
+        Row: {
+          id: string;
+          user_id: string;
+          video_id: string;
+          watched: boolean;
+          saved: boolean;
+          watched_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          video_id: string;
+          watched?: boolean;
+          saved?: boolean;
+          watched_at?: string | null;
+        };
+        Update: {
+          watched?: boolean;
+          saved?: boolean;
+          watched_at?: string | null;
+        };
+        Relationships: [];
       };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
     Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 }
 

@@ -41,6 +41,7 @@ export interface EducationTip {
   title: string;
   content: string;
   topic: string;
+  video_id?: string;
 }
 
 export interface WearableContext {
