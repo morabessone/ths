@@ -19,6 +19,8 @@ import { useDayPlanStore } from '@/stores/useDayPlanStore';
 import { useFridgeStore } from '@/stores/useFridgeStore';
 import type { EducationTip as TipType, SupplementRecommendation } from '@/types/nutrition.types';
 import { useVideoYoutubeId } from '@/hooks/useEducationVideos';
+import { Card } from '@/components/ui/Card';
+import { QUALITATIVE_DAY_INSIGHTS } from '@/constants/copy-tone';
 
 function parseTip(json: unknown): TipType | null {
   if (!json || typeof json !== 'object') return null;
@@ -156,6 +158,16 @@ export default function HomeScreen() {
           videoYoutubeId={tipVideoYoutubeId}
           onExplore={() => router.push('/(tabs)/learn')}
         />
+
+        <Card className="mt-4 mb-2">
+          <Text className="font-sans-semibold text-text-primary mb-1">¿Tenés alguna duda sobre tu día?</Text>
+          <Text className="font-sans text-text-tertiary text-sm mb-3">
+            {QUALITATIVE_DAY_INSIGHTS[new Date().getDay() % QUALITATIVE_DAY_INSIGHTS.length]}
+          </Text>
+          <Button variant="secondary" onPress={() => router.push('/(tabs)/chat' as '/(tabs)/learn')}>
+            Preguntarle a LivIn
+          </Button>
+        </Card>
       </ScrollView>
 
       <HealthConnectSheet sheetRef={healthSheetRef} userId={userId} />

@@ -26,7 +26,7 @@ export default function Step2Goals() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg">
-      <ProgressIndicator current={2} />
+      <ProgressIndicator current={2} total={7} />
       <ScrollView className="px-6">
         <Text className="font-display text-text-primary text-2xl mb-4">Objetivo y actividad</Text>
         <OptionSelector options={GOALS} value={goal} onChange={(v) => setGoal(v as Goal)} />

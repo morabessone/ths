@@ -61,7 +61,9 @@ export function VideoCard({ video, onPremiumPress, disabled }: VideoCardProps) {
         >
           {video.title}
         </Text>
-        {video.instructor ? (
+        {video.channel_name ? (
+          <Text className="font-sans text-text-tertiary text-xs mb-1">Canal: {video.channel_name}</Text>
+        ) : video.instructor ? (
           <Text className="font-sans text-text-secondary text-sm mb-1">{video.instructor}</Text>
         ) : null}
         <View className="flex-row items-center gap-2">

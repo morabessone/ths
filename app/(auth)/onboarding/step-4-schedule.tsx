@@ -18,7 +18,7 @@ export default function Step4Schedule() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg">
-      <ProgressIndicator current={4} />
+      <ProgressIndicator current={5} total={7} />
       <ScrollView className="px-6">
         <Text className="font-display text-text-primary text-2xl mb-4">Horario y rutina</Text>
         <Input label="¿A qué hora te despertás?" value={wakeTime} onChangeText={setWakeTime} placeholder="07:00" />
@@ -40,7 +40,7 @@ export default function Step4Schedule() {
             store.setField('wake_time', wakeTime);
             store.setField('training_time_picker', trainingTime);
             store.setField('cooks_at_home', cooksAtHome ?? true);
-            router.push('/(auth)/onboarding/step-5-wearable');
+            router.push('/(auth)/onboarding/step-4b-food-habits' as '/(auth)/onboarding/step-5-wearable');
           }}
         >
           Continuar

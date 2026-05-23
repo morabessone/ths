@@ -16,7 +16,7 @@ export default function Step3Preferences() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg">
-      <ProgressIndicator current={3} />
+      <ProgressIndicator current={3} total={7} />
       <ScrollView className="px-6">
         <Text className="font-display text-text-primary text-2xl mb-4">Preferencias alimentarias</Text>
         <Text className="font-sans-medium text-text-primary mb-2">Estilo dietario</Text>
@@ -63,7 +63,7 @@ export default function Step3Preferences() {
             store.setField('dietary_style', diet ?? 'omnivore');
             store.setField('intolerances', intolerances);
             store.setField('health_conditions', conditions);
-            router.push('/(auth)/onboarding/step-4-schedule');
+            router.push('/(auth)/onboarding/step-3b-routine' as '/(auth)/onboarding/step-4-schedule');
           }}
         >
           Continuar

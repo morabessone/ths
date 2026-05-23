@@ -54,6 +54,8 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     // Con sesión pero perfil aún cargando: no redirigir
     if (!profile) return;
 
+    const onResult = segments.some((s) => String(s) === 'result');
+
     // Onboarding pendiente
     if (!profile.onboarding_done) {
       if (!inOnboarding) {
@@ -62,8 +64,8 @@ function AuthGate({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Onboarding listo → app principal (no volver a welcome/login)
-    if (inAuth && !inOnboarding) {
+    // Onboarding listo → app principal (permitir pantalla result tras wearable)
+    if (inAuth && !inOnboarding && !onResult) {
       router.replace('/(tabs)');
     }
   }, [user, profile, isLoading, segments, router]);
@@ -110,6 +112,7 @@ export default function RootLayout() {
           <Stack.Screen name="settings" options={{ headerShown: false }} />
           <Stack.Screen name="supplements" options={{ headerShown: false }} />
           <Stack.Screen name="learn" options={{ headerShown: false }} />
+          <Stack.Screen name="pantry" options={{ headerShown: false }} />
         </Stack>
       </AuthGate>
     </AppProviders>

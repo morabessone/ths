@@ -32,6 +32,7 @@ export default function Step5Wearable() {
       age: store.age,
       biological_sex: store.biological_sex,
       goal: store.goal,
+      main_goal_detail: store.main_goal_detail ?? null,
       activity_level: store.activity_level ?? 'moderate',
       training_days: store.training_days ?? 3,
       training_type: store.training_type ?? 'mixed',
@@ -39,6 +40,13 @@ export default function Step5Wearable() {
       dietary_style: store.dietary_style ?? 'omnivore',
       intolerances: store.intolerances,
       health_conditions: store.health_conditions,
+      wake_time: store.wake_time ?? null,
+      sleep_time: store.sleep_time ?? null,
+      work_type: store.work_type ?? null,
+      sleep_quality: store.sleep_quality ?? null,
+      food_preferences: store.food_preferences ?? [],
+      food_dislikes: store.food_dislikes ?? [],
+      cooking_comfort: store.cooking_comfort ?? null,
     };
 
     updateBiometrics(bio as Parameters<typeof updateBiometrics>[0]);
@@ -76,7 +84,7 @@ export default function Step5Wearable() {
     await useDayPlanStore.getState().regeneratePlan(user.id);
     setLoading(false);
     setDone(true);
-    setTimeout(() => router.replace('/(tabs)'), 1200);
+    setTimeout(() => router.replace('/(auth)/onboarding/result' as '/(tabs)'), 1200);
   };
 
   if (done) {
@@ -85,7 +93,7 @@ export default function Step5Wearable() {
         <Animated.View entering={FadeIn.duration(600)} className="items-center">
           <Text className="font-display text-primary text-4xl mb-2">¡Perfil listo!</Text>
           <Text className="font-sans text-text-secondary text-center">
-            Estamos preparando tu plan del día...
+            LivIn está armando tu plan personalizado...
           </Text>
         </Animated.View>
       </SafeAreaView>
@@ -94,7 +102,7 @@ export default function Step5Wearable() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg">
-      <ProgressIndicator current={5} />
+      <ProgressIndicator current={7} total={7} />
       <ScrollView className="px-6">
         <Text className="font-display text-text-primary text-2xl mb-2">Conectá tu wearable</Text>
         <Text className="font-sans text-text-secondary mb-6">

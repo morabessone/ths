@@ -1,23 +1,26 @@
 import { Platform } from 'react-native';
 import { format } from 'date-fns';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import type { NormalizedHealthData, HealthSource } from '@/types/health.types';
+import type { NormalizedHealthData } from '@/types/health.types';
+import { isExpoGo } from './expoGo';
+import type { ManualHealthInput } from './healthService.types';
 
-export type ManualHealthInput = {
-  steps?: number;
-  sleep_hours?: number;
-  training_detected?: boolean;
-  training_type?: string;
-  calories_burned?: number;
-};
+export type { ManualHealthInput } from './healthService.types';
+export { persistWearableData, manualToNormalized } from './healthPersistence';
+
+const EXPO_GO_MESSAGE =
+  'Para conectar Apple Salud o Health Connect usá un development build (npx expo run:ios). En Expo Go podés registrar actividad manual.';
 
 export async function requestHealthPermissions(): Promise<{
   granted: boolean;
   needsDevBuild: boolean;
   message?: string;
 }> {
-  if (Platform.OS === 'web') {
-    return { granted: false, needsDevBuild: false, message: 'Usá registro manual en web.' };
+  if (Platform.OS === 'web' || isExpoGo()) {
+    return {
+      granted: false,
+      needsDevBuild: isExpoGo(),
+      message: isExpoGo() ? EXPO_GO_MESSAGE : 'Usá registro manual en web.',
+    };
   }
 
   try {
@@ -65,8 +68,7 @@ export async function requestHealthPermissions(): Promise<{
     return {
       granted: false,
       needsDevBuild: true,
-      message:
-        'Para leer Salud/Health Connect necesitás un development build (npx expo run:ios o run:android). Usá registro manual mientras tanto.',
+      message: EXPO_GO_MESSAGE,
     };
   }
 
@@ -74,12 +76,11 @@ export async function requestHealthPermissions(): Promise<{
 }
 
 export async function readHealthToday(): Promise<NormalizedHealthData | null> {
-  if (Platform.OS === 'web') return null;
+  if (Platform.OS === 'web' || isExpoGo()) return null;
 
   const today = format(new Date(), 'yyyy-MM-dd');
   const start = new Date();
   start.setHours(0, 0, 0, 0);
-  const end = new Date();
 
   try {
     if (Platform.OS === 'ios') {
@@ -126,6 +127,7 @@ export async function readHealthToday(): Promise<NormalizedHealthData | null> {
     if (Platform.OS === 'android') {
       const { initialize, readRecords } = await import('react-native-health-connect');
       await initialize();
+      const end = new Date();
       const timeRangeFilter = {
         operator: 'between' as const,
         startTime: start.toISOString(),
@@ -153,65 +155,4 @@ export async function readHealthToday(): Promise<NormalizedHealthData | null> {
   }
 
   return null;
-}
-
-export async function persistWearableData(
-  userId: string,
-  data: NormalizedHealthData | ManualHealthInput,
-  source: HealthSource
-): Promise<void> {
-  const today = format(new Date(), 'yyyy-MM-dd');
-  const row = {
-    user_id: userId,
-    date: today,
-    source,
-    steps: 'steps' in data ? (data.steps ?? null) : (data as NormalizedHealthData).steps,
-    sleep_hours:
-      'sleep_hours' in data
-        ? (data.sleep_hours ?? null)
-        : ((data as NormalizedHealthData).sleepHours ?? null),
-    calories_burned:
-      'calories_burned' in data
-        ? (data.calories_burned ?? null)
-        : ((data as NormalizedHealthData).caloriesBurned ?? null),
-    training_detected:
-      'training_detected' in data
-        ? (data.training_detected ?? false)
-        : ((data as NormalizedHealthData).trainingDetected ?? false),
-    training_type:
-      'training_type' in data
-        ? (data.training_type ?? null)
-        : ((data as NormalizedHealthData).trainingType ?? null),
-  };
-
-  if (!isSupabaseConfigured) return;
-
-  const { data: existing } = await supabase
-    .from('wearable_data')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('date', today)
-    .maybeSingle();
-
-  if (existing?.id) {
-    await supabase.from('wearable_data').update(row as never).eq('id', existing.id);
-  } else {
-    await supabase.from('wearable_data').insert(row as never);
-  }
-}
-
-export function manualToNormalized(
-  input: ManualHealthInput,
-  source: HealthSource = 'manual'
-): NormalizedHealthData {
-  return {
-    date: format(new Date(), 'yyyy-MM-dd'),
-    source,
-    steps: input.steps ?? 0,
-    caloriesBurned: input.calories_burned ?? 0,
-    activeMinutes: 0,
-    trainingDetected: input.training_detected ?? false,
-    trainingType: input.training_type,
-    sleepHours: input.sleep_hours,
-  };
 }

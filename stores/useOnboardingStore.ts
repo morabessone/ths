@@ -1,8 +1,19 @@
 import { create } from 'zustand';
 import type { BiometricsInput } from '@/types/nutrition.types';
 
+type WorkType = 'sedentary' | 'light_active' | 'active' | 'very_active';
+type SleepQuality = 'poor' | 'fair' | 'good' | 'excellent';
+type CookingComfort = 'minimal' | 'basic' | 'comfortable' | 'enthusiast';
+
 interface OnboardingStore extends Partial<BiometricsInput> {
   wake_time?: string;
+  sleep_time?: string;
+  work_type?: WorkType;
+  sleep_quality?: SleepQuality;
+  cooking_comfort?: CookingComfort;
+  food_preferences?: string[];
+  food_dislikes?: string[];
+  main_goal_detail?: string;
   training_time_picker?: string;
   cooks_at_home?: boolean;
   wearable_source?: string;
@@ -15,6 +26,8 @@ interface OnboardingStore extends Partial<BiometricsInput> {
 const initial: OnboardingStore = {
   intolerances: [],
   health_conditions: [],
+  food_preferences: [],
+  food_dislikes: [],
   setField: () => {},
   reset: () => {},
 };

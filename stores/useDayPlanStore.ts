@@ -4,16 +4,15 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { buildPlanWithAI } from '@/lib/ai/nutritionAdvisor';
 import { studiesFromDb } from '@/lib/nutrition/dailyPlanBuilder';
 import {
-  readHealthToday,
   persistWearableData,
   manualToNormalized,
   type ManualHealthInput,
-} from '@/lib/health/healthService';
+} from '@/lib/health/healthPersistence';
 import type { DailyPlan, Json, NutrientTargetsRow, WearableData } from '@/types/database.types';
 import type { BiometricsInput, DailyPlanBuilt } from '@/types/nutrition.types';
 import type { NormalizedHealthData } from '@/types/health.types';
 import { useUserStore } from './useUserStore';
-import { useFridgeStore } from './useFridgeStore';
+import { loadFridgeStock, fridgeIngredientNames } from '@/lib/fridge/stockService';
 
 interface DayPlanStore {
   todayPlan: DailyPlan | null;
@@ -73,7 +72,8 @@ async function buildAndPersist(userId: string, wearable: NormalizedHealthData | 
   };
 
   const studies = await fetchStudies(userId);
-  const fridgeIngredients = useFridgeStore.getState().stock.map((s) => s.ingredient_name);
+  const fridgeStock = await loadFridgeStock(userId);
+  const fridgeIngredients = fridgeIngredientNames(fridgeStock);
 
   const built = await buildPlanWithAI({
     bio: biometrics,
@@ -201,7 +201,7 @@ export const useDayPlanStore = create<DayPlanStore>((set, get) => ({
         },
         wearable: normalized,
         studies: await fetchStudies(userId),
-        fridgeIngredients: useFridgeStore.getState().stock.map((s) => s.ingredient_name),
+        fridgeIngredients: fridgeIngredientNames(await loadFridgeStock(userId)),
       });
       set({ planBuilt: built });
     }
@@ -210,7 +210,6 @@ export const useDayPlanStore = create<DayPlanStore>((set, get) => ({
   regeneratePlan: async (userId) => {
     set({ isGenerating: true });
     try {
-      await useFridgeStore.getState().loadStock(userId);
       const normalized = wearableToNormalized(get().wearableData);
       const result = await buildAndPersist(userId, normalized);
       if (result) {
@@ -247,7 +246,7 @@ export const useDayPlanStore = create<DayPlanStore>((set, get) => ({
   },
 
   syncWearableFromHealth: async (userId) => {
-    const { requestHealthPermissions } = await import('@/lib/health/healthService');
+    const { requestHealthPermissions, readHealthToday } = await import('@/lib/health/healthService');
     const perm = await requestHealthPermissions();
     if (!perm.granted) {
       return { ok: false, message: perm.message ?? 'Permisos no otorgados. Usá registro manual.' };

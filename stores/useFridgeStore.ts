@@ -5,7 +5,8 @@ import type { Meal, MealType } from '@/types/nutrition.types';
 import { pickMealForMoment } from '@/lib/nutrition/mealComposer';
 import type { BiometricsInput } from '@/types/nutrition.types';
 import { useUserStore } from './useUserStore';
-import { useDayPlanStore } from './useDayPlanStore';
+import { loadFridgeStock as fetchFridgeStock } from '@/lib/fridge/stockService';
+import type { MicroGuidance } from '@/types/nutrition.types';
 
 interface FridgeStore {
   stock: FridgeStockItem[];
@@ -24,12 +25,8 @@ export const useFridgeStore = create<FridgeStore>((set, get) => ({
   loadStock: async (userId) => {
     if (!isSupabaseConfigured) return;
     set({ isLoading: true });
-    const { data } = await supabase
-      .from('fridge_stock')
-      .select('*')
-      .eq('user_id', userId)
-      .order('added_at', { ascending: false });
-    set({ stock: data ?? [], isLoading: false });
+    const data = await fetchFridgeStock(userId);
+    set({ stock: data, isLoading: false });
   },
 
   addIngredient: async (item) => {
@@ -63,7 +60,8 @@ export const useFridgeStore = create<FridgeStore>((set, get) => ({
   generateMeal: async (mealType) => {
     const stock = get().stock.map((s) => s.ingredient_name);
     const bioRaw = useUserStore.getState().latestBiometrics;
-    const micro = useDayPlanStore.getState().planBuilt?.microGuidance ?? [];
+    const { useDayPlanStore } = await import('./useDayPlanStore');
+    const micro: MicroGuidance[] = useDayPlanStore.getState().planBuilt?.microGuidance ?? [];
     const bio: BiometricsInput = {
       weight_kg: Number(bioRaw?.weight_kg ?? 70),
       height_cm: Number(bioRaw?.height_cm ?? 170),

@@ -26,7 +26,7 @@ export default function Step1Biometrics() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg">
-      <ProgressIndicator current={1} />
+      <ProgressIndicator current={1} total={7} />
       <ScrollView className="px-6" contentContainerStyle={{ paddingBottom: 32 }}>
         <Text className="font-display text-text-primary text-2xl mb-2">Tus datos base</Text>
         <Text className="font-sans text-text-secondary mb-6">

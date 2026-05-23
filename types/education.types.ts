@@ -22,6 +22,8 @@ export interface EducationVideo {
   description: string | null;
   instructor: string | null;
   instructor_bio: string | null;
+  channel_name?: string | null;
+  channel_url?: string | null;
   duration_min: number | null;
   level: VideoLevel;
   tags: string[];
